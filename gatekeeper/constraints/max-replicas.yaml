@@ -1,0 +1,13 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sMaxReplicas
+metadata:
+  name: deployment-max-replicas
+spec:
+  match:
+    kinds:
+      - apiGroups: ["apps"]
+        kinds: ["Deployment"] # Chỉ quét các resource dạng Deployment
+    namespaces:
+      - demo                  # Chỉ áp dụng trong namespace demo
+  parameters:
+    max: 5                    # Đặt giới hạn tối đa là 5 replicas
