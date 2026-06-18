@@ -13,4 +13,5 @@ spec:
           MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAETtY3Fqurkf5YUySokoZqnljwaFYC
           JHQ7eMy0VEkHmoHpCs0rawqJ/fpIBytYTBB63Oluirih5/sqwBjrYVUKAw==
           -----END PUBLIC KEY-----
+      name: authority-0
   mode: enforce
