@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: payments
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+  labels:
+    # Bật verify chữ ký hình ảnh một khi policy controller được cài đặt
+    policy.sigstore.dev/include: "true"

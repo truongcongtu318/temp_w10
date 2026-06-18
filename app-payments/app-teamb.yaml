@@ -1,0 +1,29 @@
+# Deployment cho Team B trong namespace payments
+# Kế thừa guardrails: không dùng :latest, không runAsUser: 0, không hostNetwork
+# Không khai báo resources.limits để chứng minh LimitRange tự gán mặc định
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: payments-api
+  namespace: payments
+  labels:
+    app: payments-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: payments-api
+  template:
+    metadata:
+      labels:
+        app: payments-api
+    spec:
+      containers:
+      - name: payments-api
+        image: ghcr.io/truongcongtu318/w10-api:0.0.1  # Tag version pinned, KHÔNG dùng :latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8080
+        securityContext:
+          runAsUser: 1000  # KHÔNG chạy root (uid 0)
+        # Không khai báo resources → LimitRange sẽ tự gán default limits/requests

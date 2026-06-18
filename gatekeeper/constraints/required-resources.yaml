@@ -9,6 +9,7 @@ spec:
         kinds: ["Pod"]
     namespaces:
       - demo
+      - payments      
   parameters:
     limits:
       - cpu

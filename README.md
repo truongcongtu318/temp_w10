@@ -188,6 +188,20 @@ ArgoCD applications deploy in order:
 - Wave 1: `app-analysis`, `app-alert` (configuration)
 - Wave 2: `app-api` (application)
 
+## Lab 4: Payments Namespace Guardrails & Multi-tenancy
+
+We have set up a new isolated environment (`payments` namespace) for Team B to deploy their workloads while inheriting existing guardrails and enforcing strict isolation.
+
+### Guardrails and Isolation Q&A (Point-plus)
+
+#### 1. Vì sao guardrail cũ tự áp cho team B mà không cần viết luật mới?
+- **Gatekeeper Constraints**: Chúng tôi đã sửa đổi các file `Constraint` nằm trong `gatekeeper/constraints/` để bổ sung namespace `payments` vào danh sách `match.namespaces`. Do đó, khi bất kỳ tài nguyên nào được deploy vào namespace `payments`, Gatekeeper Admission Webhook sẽ tự động đối chiếu với 4 luật bảo mật cũ (chặn tag `:latest`, bắt buộc `limits`, cấm `runAsUser: 0`, cấm `hostNetwork`) mà không cần định nghĩa lại luật.
+- **Sigstore Policy Controller**: Namespace `payments` được gán nhãn `policy.sigstore.dev/include: "true"` tại file `app-payments/namespace.yaml`. Do đó, `ClusterImagePolicy` (có hiệu lực toàn cụm) sẽ tự động kiểm tra chữ ký của các container image chạy trong namespace `payments`, chặn đứng các image chưa được ký bằng Cosign key của hệ thống.
+
+#### 2. Role/RoleBinding khác ClusterRoleBinding ra sao để giữ cô lập?
+- **Role & RoleBinding (Namespaced)**: Được định nghĩa và giới hạn bên trong một namespace duy nhất (`namespace: payments`). Khi chúng ta gán quyền cho user `payments-dev` bằng `RoleBinding` kết hợp với `Role` trong `payments`, user này chỉ có thể thao tác (CRUD workload) với các resource nằm trong namespace `payments`. Họ hoàn toàn không có quyền xem hay sửa đổi các resource ở namespace khác (như `demo` của Team A).
+- **ClusterRoleBinding (Cluster-wide)**: Gắn kết một user với `ClusterRole` để cấp quyền trên toàn cụm Kubernetes (cho tất cả các namespaces). Nếu dùng `ClusterRoleBinding`, user `payments-dev` sẽ có thể can thiệp sang namespace `demo` hoặc các namespace hệ thống, làm phá vỡ ranh giới cô lập giữa các team (multi-tenancy isolation). Việc sử dụng `RoleBinding` ở cấp độ namespace là bắt buộc để thực thi nguyên tắc đặc quyền tối thiểu (Least Privilege).
+
 ## Cleanup
 
 ```bash

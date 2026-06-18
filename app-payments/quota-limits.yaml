@@ -1,0 +1,29 @@
+# ResourceQuota: Giới hạn ngân sách tài nguyên của namespace payments
+apiVersion: v1
+kind: ResourceQuota
+metadata:
+  name: payments-quota
+  namespace: payments
+spec:
+  hard:
+    pods: "3"                     # Tối đa 3 pods
+    requests.cpu: "500m"          # Tối đa CPU requests
+    requests.memory: "256Mi"      # Tối đa RAM requests
+    limits.cpu: "1000m"           # Tối đa CPU limits
+    limits.memory: "512Mi"        # Tối đa RAM limits (ngân sách tổng)
+---
+# LimitRange: Định nghĩa cấu hình tài nguyên mặc định cho pod/container
+apiVersion: v1
+kind: LimitRange
+metadata:
+  name: payments-limits
+  namespace: payments
+spec:
+  limits:
+  - default:                      # Tự động gán Limits nếu Pod không định nghĩa
+      cpu: "200m"
+      memory: "128Mi"
+    defaultRequest:               # Tự động gán Requests nếu Pod không định nghĩa
+      cpu: "100m"
+      memory: "64Mi"
+    type: Container

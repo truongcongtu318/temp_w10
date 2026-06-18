@@ -1,0 +1,39 @@
+# NetworkPolicy cô lập namespace payments
+# Kết hợp 2 policy: chặn ingress vào + chặn egress ra ngoài (chỉ cho phép intra-ns + DNS)
+---
+# Policy 1: Default-deny Ingress — không cho phép bất kỳ traffic nào gọi VÀO payments
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: deny-ingress
+  namespace: payments
+spec:
+  podSelector: {}
+  policyTypes:
+  - Ingress
+---
+# Policy 2: Egress chỉ cho cùng namespace + DNS
+# → Chặn payments gọi RA service ở namespace khác (bao gồm demo)
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-samedns-and-dns-only
+  namespace: payments
+spec:
+  podSelector: {}
+  policyTypes:
+  - Egress
+  egress:
+  # Cho phép gọi nội bộ trong cùng namespace payments
+  - to:
+    - podSelector: {}
+  # Cho phép DNS (CoreDNS trong kube-system)
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: kube-system
+    ports:
+    - protocol: UDP
+      port: 53
+    - protocol: TCP
+      port: 53
