@@ -1,0 +1,25 @@
+# ----------------------------------------------------
+# 1. ALICE: Developer (CRUD workload chỉ trong ns "demo")
+# ----------------------------------------------------
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: developer-role
+  namespace: demo
+rules:
+- apiGroups: ["", "apps"]
+  resources: ["pods", "services", "deployments", "replicasets"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+
+---
+# ----------------------------------------------------
+# 2. BOB: SRE (Xem + thao tác pod toàn cụm)
+# ----------------------------------------------------
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: sre-pod-manager-role
+rules:
+- apiGroups: [""]
+  resources: ["pods", "pods/exec", "pods/portforward", "pods/log"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
