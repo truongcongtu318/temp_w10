@@ -2,8 +2,6 @@ apiVersion: templates.gatekeeper.sh/v1
 kind: ConstraintTemplate
 metadata:
   name: k8shostnetwork
-  annotations:
-    argocd.argoproj.io/sync-wave: "-1"
 spec:
   crd:
     spec:
@@ -18,17 +16,3 @@ spec:
           input.review.object.spec.hostNetwork == true
           msg := "Sharing the host network (hostNetwork: true) is disallowed."
         }
----
-apiVersion: constraints.gatekeeper.sh/v1beta1
-kind: K8sHostNetwork
-metadata:
-  name: container-hostnetwork
-  annotations:
-    argocd.argoproj.io/sync-wave: "0"
-spec:
-  match:
-    kinds:
-      - apiGroups: [""]
-        kinds: ["Pod"]
-    namespaces:
-      - demo

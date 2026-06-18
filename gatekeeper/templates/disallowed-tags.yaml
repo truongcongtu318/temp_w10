@@ -2,8 +2,6 @@ apiVersion: templates.gatekeeper.sh/v1
 kind: ConstraintTemplate
 metadata:
   name: k8sdisallowedtags
-  annotations:
-    argocd.argoproj.io/sync-wave: "-1"
 spec:
   crd:
     spec:
@@ -26,7 +24,7 @@ spec:
           container := input_containers[_]
           tags := [tag | tag := input.parameters.tags[_]]
           satisfied(container, tags)
-          msg := sprintf("container <%v> has disallowed image tag <%v>, allowed tags are not in list %v", [container.name, image_tag(container.image), tags])
+          msg := sprintf("container <%v> has disallowed image tag <%v>", [container.name, image_tag(container.image)])
         }
 
         satisfied(container, tags) {
@@ -39,15 +37,9 @@ spec:
           "latest" == tags[_]
         }
 
-        input_containers[c] {
-          c := input.review.object.spec.containers[_]
-        }
-        input_containers[c] {
-          c := input.review.object.spec.initContainers[_]
-        }
-        input_containers[c] {
-          c := input.review.object.spec.ephemeralContainers[_]
-        }
+        input_containers[c] { c := input.review.object.spec.containers[_] }
+        input_containers[c] { c := input.review.object.spec.initContainers[_] }
+        input_containers[c] { c := input.review.object.spec.ephemeralContainers[_] }
 
         image_tag(image) = tag {
           parts := split(image, ":")
@@ -63,21 +55,3 @@ spec:
           last_part := parts[count(parts) - 1]
           contains(last_part, "/")
         }
----
-apiVersion: constraints.gatekeeper.sh/v1beta1
-kind: K8sDisallowedTags
-metadata:
-  name: container-disallowed-tags
-  annotations:
-    argocd.argoproj.io/sync-wave: "0"
-spec:
-  match:
-    kinds:
-      - apiGroups: [""]
-        kinds: ["Pod"]
-    namespaces:
-      - demo
-      - monitoring
-  parameters:
-    tags:
-      - latest

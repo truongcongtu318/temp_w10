@@ -1,16 +1,16 @@
-# ArgoCD App: Deploy Gatekeeper ConstraintTemplates and Constraints
+# ArgoCD App: Deploy Gatekeeper ConstraintTemplates (synced before Constraints)
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: app-gatekeeper
+  name: gatekeeper-templates
   namespace: argocd
   annotations:
-    argocd.argoproj.io/sync-wave: "0"
+    argocd.argoproj.io/sync-wave: "-1"
 spec:
   project: default
   source:
     repoURL: https://github.com/truongcongtu318/temp_w10.git
-    path: gatekeeper
+    path: gatekeeper/templates
     targetRevision: main
   destination:
     server: https://kubernetes.default.svc

@@ -2,8 +2,6 @@ apiVersion: templates.gatekeeper.sh/v1
 kind: ConstraintTemplate
 metadata:
   name: k8srequiredresources
-  annotations:
-    argocd.argoproj.io/sync-wave: "-1"
 spec:
   crd:
     spec:
@@ -31,27 +29,5 @@ spec:
           msg := sprintf("container <%v> is missing required resource limits %v", [container.name, missing])
         }
 
-        input_containers[c] {
-          c := input.review.object.spec.containers[_]
-        }
-        input_containers[c] {
-          c := input.review.object.spec.initContainers[_]
-        }
----
-apiVersion: constraints.gatekeeper.sh/v1beta1
-kind: K8sRequiredResources
-metadata:
-  name: container-required-resources
-  annotations:
-    argocd.argoproj.io/sync-wave: "0"
-spec:
-  match:
-    kinds:
-      - apiGroups: [""]
-        kinds: ["Pod"]
-    namespaces:
-      - demo
-  parameters:
-    limits:
-      - cpu
-      - memory
+        input_containers[c] { c := input.review.object.spec.containers[_] }
+        input_containers[c] { c := input.review.object.spec.initContainers[_] }
