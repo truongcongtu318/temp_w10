@@ -1,0 +1,83 @@
+apiVersion: templates.gatekeeper.sh/v1
+kind: ConstraintTemplate
+metadata:
+  name: k8sdisallowedtags
+  annotations:
+    argocd.argoproj.io/sync-wave: "-1"
+spec:
+  crd:
+    spec:
+      names:
+        kind: K8sDisallowedTags
+      validation:
+        openAPIV3Schema:
+          type: object
+          properties:
+            tags:
+              type: array
+              items:
+                type: string
+  targets:
+    - target: admission.k8s.gatekeeper.sh
+      rego: |
+        package k8sdisallowedtags
+
+        violation[{"msg": msg}] {
+          container := input_containers[_]
+          tags := [tag | tag := input.parameters.tags[_]]
+          satisfied(container, tags)
+          msg := sprintf("container <%v> has disallowed image tag <%v>, allowed tags are not in list %v", [container.name, image_tag(container.image), tags])
+        }
+
+        satisfied(container, tags) {
+          tag := image_tag(container.image)
+          tag == tags[_]
+        }
+
+        satisfied(container, tags) {
+          not contains(container.image, ":")
+          "latest" == tags[_]
+        }
+
+        input_containers[c] {
+          c := input.review.object.spec.containers[_]
+        }
+        input_containers[c] {
+          c := input.review.object.spec.initContainers[_]
+        }
+        input_containers[c] {
+          c := input.review.object.spec.ephemeralContainers[_]
+        }
+
+        image_tag(image) = tag {
+          parts := split(image, ":")
+          last_part := parts[count(parts) - 1]
+          not contains(last_part, "/")
+          tag := last_part
+        }
+        image_tag(image) = "latest" {
+          not contains(image, ":")
+        }
+        image_tag(image) = "latest" {
+          parts := split(image, ":")
+          last_part := parts[count(parts) - 1]
+          contains(last_part, "/")
+        }
+---
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sDisallowedTags
+metadata:
+  name: container-disallowed-tags
+  annotations:
+    argocd.argoproj.io/sync-wave: "0"
+spec:
+  match:
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+    namespaces:
+      - demo
+      - monitoring
+  parameters:
+    tags:
+      - latest
