@@ -5,12 +5,12 @@ metadata:
   name: require-signed-images
 spec:
   images:
-    - glob: "ghcr.io/**"       # Áp dụng cho tất cả image từ GHCR
+    - glob: "ghcr.io/**"
   authorities:
     - key:
         data: |
-         -----BEGIN PUBLIC KEY-----
+          -----BEGIN PUBLIC KEY-----
           MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAETtY3Fqurkf5YUySokoZqnljwaFYC
           JHQ7eMy0VEkHmoHpCs0rawqJ/fpIBytYTBB63Oluirih5/sqwBjrYVUKAw==
           -----END PUBLIC KEY-----
-  mode: enforce                # enforce = reject nếu chưa ký; warn = chỉ cảnh báo
+  mode: enforce
