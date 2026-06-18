@@ -1,0 +1,23 @@
+# ArgoCD App: Deploy ClusterImagePolicy
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: image-policies
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "0" # Chạy SAU operator policy-controller
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/truongcongtu318/temp_w10.git
+    path: signing
+    targetRevision: main
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: cosign-system
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+    - ServerSideApply=true
