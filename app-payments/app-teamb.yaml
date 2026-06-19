@@ -20,7 +20,8 @@ spec:
     spec:
       containers:
       - name: payments-api
-        image: ghcr.io/truongcongtu318/w10-api:0.0.1  # Tag version pinned, KHÔNG dùng :latest
+        # Đổi từ tag :0.0.1 sang digest @sha256:... để đồng bộ với Sigstore Policy Controller
+        image: ghcr.io/truongcongtu318/w10-api@sha256:fb84cd3a6d184ee2d49be7f666fc17677de37311ac88a81faaeaa5af3eb69b4b
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 8080
